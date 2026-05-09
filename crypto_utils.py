@@ -42,3 +42,15 @@ def derive_aes_key(master_password: str, salt: bytes) -> bytes:
         PBKDF2_ITERATIONS,
         dklen=32
     )
+
+def encrypt_text(plain_text: str, key: bytes) -> tuple[str, str]:
+    aesgcm = AESGCM(key)
+    nonce = os.urandom(12)
+    cipher_text = aesgcm.encrypt(nonce, plain_text.encode('utf-8'), None)
+    return b64e(nonce), b64e(cipher_text)
+
+
+def decrypt_text(nonce_b64: str, cipher_text_b64: str, key: bytes) -> str:
+    aesgcm = AESGCM(key)
+    plain_text = aesgcm.decrypt(b64d(nonce_b64), b64d(cipher_text_b64), None)
+    return plain_text.decode('utf-8')
