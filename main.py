@@ -54,6 +54,38 @@ class PasswordManagerApp:
         self.user = user
         self.aes_key = derive_aes_key(self.master_entry.get(), b64d(user['salt']))
         self.show_main_screen()
+
+
+
+
+
+
+
+        ttk.Button(form, text='Generate Strong Password', command=self.generate_password).grid(row=3, column=2, padx=8)
+        ttk.Button(form, text='Save', command=self.save_password).grid(row=5, column=1, sticky='w', pady=8)
+        ttk.Button(form, text='Clear', command=self.clear_form).grid(row=5, column=1, sticky='e', pady=8)
+
+        table_frame = ttk.Frame(self.root, padding=10)
+        table_frame.pack(fill='both', expand=True)
+
+        columns = ('account', 'username', 'category', 'password', 'notes', 'updated_at')
+        self.tree = ttk.Treeview(table_frame, columns=columns, show='headings')
+        for col in columns:
+            self.tree.heading(col, text=col.capitalize())
+            self.tree.column(col, width=120)
+        self.tree.pack(fill='both', expand=True, side='left')
+        self.tree.bind('<<TreeviewSelect>>', self.load_selected)
+
+        scrollbar = ttk.Scrollbar(table_frame, orient='vertical', command=self.tree.yview)
+        scrollbar.pack(side='right', fill='y')
+        self.tree.configure(yscrollcommand=scrollbar.set)
+
+        bottom = ttk.Frame(self.root, padding=10)
+        bottom.pack(fill='x')
+        ttk.Button(bottom, text='Delete Selected', command=self.delete_selected).pack(side='left')
+        ttk.Button(bottom, text='Refresh', command=self.load_passwords).pack(side='left', padx=5)
+
+        self.load_passwords()
         
                   
                 
