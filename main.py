@@ -134,6 +134,61 @@ class PasswordManagerApp:
         self. username_entry.grid(row=1, column=1, pady=3)
         self.category_combo.grid(row=2, column=1, pady=3)
         self.password_entry.grid(row=3, column=1, pady=3)  
-        self.notes_entry.grid(row=4, column=1, pady=3) 
-                  
-                
+        self.notes_entry.grid(row=4, column=1, pady=3)
+
+    def load_selected(self, event):
+        selected = self.tree.selection()
+        if not selected:
+            return
+        self.selected_id = int(selected[0])
+        values = self.tree.item(selected[0], 'values')
+        self.account_entry.delete(0, tk.END)
+        self.account_entry.insert(0, values[0])
+        self.username_entry.delete(0, tk.END)
+        self.username_entry.insert(0, values[1])
+        self.category_combo.set(values[2])
+        self.password_entry.delete(0, tk.END)
+        self.password_entry.insert(0, values[3])
+        self.notes_entry.delete(0, tk.END)
+        self.notes_entry.insert(0, values[4])
+
+        def delete_selected(self):
+            selected = self.tree.selection()
+            if not selected:
+                messagebox.showwarning('Kujdes', 'Zgjedh një rekord për fshirje.')
+                return
+            if not messagebox.askyesno('Konfirmo', 'A je i sigurt që dëshiron ta fshish?'):
+                return
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute('DELETE FROM passwords WHERE id=%s AND user_id=%s', (int(selected[0]), self.user['id']))
+            conn.commit()
+            cursor.close()
+            conn.close()
+            self.clear_form()
+            self.load_passwords()
+
+        def export_sync(self):
+            conn = get_connection()
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute('SELECT account, username, category, encrypted_password, nonce, notes, updated_at FROM passwords WHERE user_id=%s', (self.user['id'],))
+            rows = cursor.fetchall()
+            cursor.close()
+            conn.close()
+            data = {
+                'email': self.user['email'],
+                'exported_at': datetime.now().isoformat(timespec='seconds'),
+                'passwords': rows
+            }
+            json_data = json.dumps(data, ensure_ascii=False, default=str)
+            nonce, encrypted_backup = encrypt_text(json_data, self.aes_key)
+            sync_file = {'version': 1, 'nonce': nonce, 'encrypted_data': encrypted_backup}
+
+            path = filedialog.asksaveasfilename(defaultextension='.json', filetypes=[('JSON file', '*.json')])
+            if not path:
+                return
+            with open(path, 'w', encoding='utf-8') as f:
+                json.dump(sync_file, f, indent=2)
+            messagebox.showinfo('Export', 'Sync file u krijua me sukses.')
+                    
+                    
