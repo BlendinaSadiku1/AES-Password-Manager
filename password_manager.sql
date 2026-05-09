@@ -1,4 +1,8 @@
 CREATE DATABASE IF NOT EXISTS password_manager_aes;
+
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
+
 USE password_manager_aes;
 
 CREATE TABLE IF NOT EXISTS users (
@@ -7,7 +11,7 @@ CREATE TABLE IF NOT EXISTS users (
     salt VARCHAR(255) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS passwords (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -22,4 +26,4 @@ CREATE TABLE IF NOT EXISTS passwords (
     CONSTRAINT fk_passwords_user
         FOREIGN KEY (user_id) REFERENCES users(id)
         ON DELETE CASCADE
-)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
