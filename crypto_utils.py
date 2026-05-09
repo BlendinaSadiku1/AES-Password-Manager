@@ -27,3 +27,18 @@ def hash_master_password(password: str, salt: bytes) -> str:
         dklen=32
     )
     return b64e(hashed)
+
+
+def verify_master_password(password: str, salt: bytes, expected_hash_b64: str) -> bool:
+    calculated = hash_master_password(password, salt)
+    return calculated == expected_hash_b64
+
+
+def derive_aes_key(master_password: str, salt: bytes) -> bytes:
+    return hashlib.pbkdf2_hmac(
+        'sha256',
+        master_password.encode('utf-8'),
+        salt,
+        PBKDF2_ITERATIONS,
+        dklen=32
+    )
