@@ -86,6 +86,25 @@ class PasswordManagerApp:
         ttk.Button(bottom, text='Refresh', command=self.load_passwords).pack(side='left', padx=5)
 
         self.load_passwords()
+
+    def load_passwords(self):
+        for item in self.tree.get_children():
+            self.tree.delete(item)
+
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute('SELECT * FROM passwords WHERE user_id=%s ORDER BY category, account', (self.user['id'],))
+        rows = cursor.fetchall()
+        cursor.close()
+        conn.close()
+
+        for row in rows:
+            try:
+                plain_password = decrypt_text(row['nonce'], row['encrypted_password'], self.aes_key)
+            except Exception:
+                plain_password = '[Nuk mund të dekriptohet]'
+            self.tree.insert('', 'end', iid=row['id'], values=(row['account'], row['username'], row['category'], plain_password, row['notes'], row['updated_at']))
+    
         
                   
                 
