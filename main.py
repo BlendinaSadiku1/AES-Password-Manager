@@ -41,4 +41,19 @@ class PasswordManagerApp:
         ttk:Button(frame, text='Register', command=self.register).grid(row=3, column=1, pady=15)
 
         ttk:Label(frame, text='Master password perdoret per te krijuar çelesin AES. Mos e harro.',foreground='gray').grid(row=4, column=0, columnspan=2)
+
+    def register(self):
+        ok, msg= create_user(self.email_entry.get(), self.master_entry.get())
+        messagebox.showinfo('Register', msg) if ok else messagebox.showerror('Gabim', msg)
+
+    def login(self):
+        user = authenticate_user(self.email_entry.get(), self.master_entry.get())
+        if not user:
+            messagebox.showerror('Gabim', 'Email ose master password eshte gabim.')
+            return
+        self.user = user
+        self.aes_key = derive_aes_key(self.master_entry.get(), b64d(user['salt']))
+        self.show_main_screen()
+        
+                  
                 
