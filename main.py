@@ -55,5 +55,34 @@ class PasswordManagerApp:
         self.aes_key = derive_aes_key(self.master_entry.get(), b64d(user['salt']))
         self.show_main_screen()
         
+    def show_main_screen(self):
+        self.clear()
+        top = ttk.Frame(self.root, padding=10)
+        top.pack(fill='x')
+        ttk.Label(top, text=f'I kyçur si: {self.user['email']}', font=('Arial', 12, 'bold')).pack(side='left')
+        ttk.Button(top, text='Export Sync File', command=self.export.sync).pack(side='right', padx=5)
+        ttk.Button(top, text='Import Sync File', command=self.import_sync).pack(side='right', padx=5)
+        ttk.Button(top, text='Logout', command=self.show_login_screen).pack(side='right', padx=5)
+
+        form = ttk.LabelFrame(self.root, text='Shto / Perditeso fjalkalimin', padding=10)
+        form.pack(fill='x', padx=10, pady=5)
+
+        self.selected_id = None
+        labels = ['Account:', 'Username:', 'Category:', 'Password:', 'Notes:']
+        for i, label in enumerate(labels):
+            ttk.Label(form, text=label).grid(row=i, column=0, sticky='w', pady=3)
+
+        self.account_entry = ttk.Entry(form, width=35)
+        self.username_entry = ttk.Entry(form, width=35)
+        self.category_combo = ttk.Combobox(form, values=CATEGORIES, state='readonly', width=32)
+        self.password_entry = ttk.Entry(form, width=35)
+        self.notes_entry = ttk.Entry(form, width=35)
+        self.category_combo.set('General')
+
+        self.account_entry.grid(row=0, column=1, pady=3)
+        self. username_entry.grid(row=1, column=1, pady=3)
+        self.category_combo.grid(row=2, column=1, pady=3)
+        self.password_entry.grid(row=3, column=1, pady=3)  
+        self.notes_entry.grid(row=4, column=1, pady=3) 
                   
                 
