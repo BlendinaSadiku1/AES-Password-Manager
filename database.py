@@ -77,7 +77,7 @@ def create_user(email: str, master_password: str) -> tuple [bool, str]:
         return False, f'Gabim ne databaze: {e}'
 
 
-def autheneticate_user(email: str, master_password: str) -> Optional[Dict[str, Any]]:
+def authenticate_user(email: str, master_password: str) -> Optional[Dict[str, Any]]:
     email = email.strip().lower()
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
