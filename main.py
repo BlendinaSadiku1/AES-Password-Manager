@@ -192,3 +192,36 @@ class PasswordManagerApp:
             messagebox.showinfo('Export', 'Sync file u krijua me sukses.')
                     
                     
+        def import_sync(self):
+                path = filedialog.askopenfilename(filetypes=[('JSON file', '*.json')])
+                if not path:
+                    return
+                try:
+                    with open(path, 'r', encoding='utf-8') as f:
+                        sync_file = json.load(f)
+                    json_data = decrypt_text(sync_file['nonce'], sync_file['encrypted_data'], self.aes_key)
+                    data = json.loads(json_data)
+                except Exception:
+                    messagebox.showerror('Gabim', 'Ky file nuk mund të dekriptohet me këtë master password.')
+                    return
+
+                imported = 0
+                conn = get_connection()
+                cursor = conn.cursor()
+                for item in data.get('passwords', []):
+                    cursor.execute('''
+                        INSERT INTO passwords(user_id, account, username, category, encrypted_password, nonce, notes, updated_at)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    ''', (self.user['id'], item['account'], item.get('username', ''), item.get('category', 'General'), item['encrypted_password'], item['nonce'], item.get('notes', ''), item.get('updated_at', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))))
+                    imported += 1
+                conn.commit()
+                cursor.close()
+                conn.close()
+                self.load_passwords()
+                messagebox.showinfo('Import', f'U importuan {imported} rekorde.')
+
+if __name__ == '__main__':
+    init_db()
+    root = tk.Tk()
+    app = PasswordManagerApp(root)
+    root.mainloop()
