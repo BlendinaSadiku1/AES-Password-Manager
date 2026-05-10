@@ -45,3 +45,33 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
     ''')
+    
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+def create_user(email: str, master_password: str) -> tuple [bool, str]:
+email = email.strip().lower()
+if not email or '@' not in email:
+    return False, 'Shkruaj nje email valid.'
+if len(master_password) < 8:
+    return False, 'Master password duhet te kete se paku 8 karaktere'
+
+salt = generate_salt()
+password_hash = hash_master_password(master_password, salt)
+
+try:
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        'INSERT INTO users(email, salt, password_hash) VALUES (%s, %s, %s)',
+        (email, b64e(salt), password_hash)
+    )
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return True, 'Llogaria u krijua me sukses.'
+except mysql.connector.IntegrityError:
+    return False, 'Ky email ekziston tashme.'
+except Error as e:
+    return False, f'Gabim ne databaze: {e}'
