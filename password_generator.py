@@ -8,7 +8,8 @@ def generate_strong_password(length: int=16) -> str:
 
     lower = string.ascii_lowercase
     upper = string.ascii_uppercase
-    digits = '!@#$%^&*()-_=+[]{};:,.?' 
+    digits = string.digits
+    symbols = '!@#$%^&*()-_=+[]{};:,.?' 
     all_chars = lower + upper + digits + symbols
 
     password = [
